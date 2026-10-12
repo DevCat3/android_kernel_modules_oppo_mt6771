@@ -11,14 +11,7 @@
 #include <linux/err.h>
 #include <linux/string.h>
 #include <linux/sysfs.h>
-#ifdef CONFIG_OPLUS_KEVENT_UPLOAD
 #include <linux/version.h>
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0))
-#include <../../../arch/arm64/kernel/secureguard/rootguard/oplus_kevent.h>
-#else
-#include <linux/oplus_kevent.h>
-#endif
-#endif
 #include <soc/oplus/system/kernel_fb.h>
 #include <linux/delay.h>
 #include <linux/mutex.h>
@@ -30,6 +23,14 @@
 #include <linux/module.h>
 #include <linux/slab.h>
 #include <linux/uaccess.h>
+
+/* Stub implementation for kevent_send_to_user */
+int kevent_send_to_user(struct kernel_packet_info *userinfo)
+{
+    /* Always return success (0) since kevent is disabled */
+    return 0;
+}
+EXPORT_SYMBOL(kevent_send_to_user);
 
 #define MAX_LOG (31)
 #define MAX_ID (19)
@@ -59,12 +60,6 @@ static char *const _tag[FB_MAX_TYPE + 1] = {
 	"PSW_BSP_SENSOR",
 	"fb_boot",
 };
-
-#ifdef CONFIG_OPLUS_KEVENT_UPLOAD
-#if (LINUX_VERSION_CODE >= KERNEL_VERSION(5, 4, 0)) && !IS_ENABLED(CONFIG_OPLUS_KERNEL_SECURE_GUARD)
-int kevent_send_to_user(struct kernel_packet_info *userinfo) {return 0;}
-#endif
-#endif
 
 static struct packet * package_alloc(
 	fb_tag tag_id, const char *event_id, unsigned char *payload)
@@ -153,7 +148,7 @@ exit:
 
 	return 0;
 }
-
+EXPORT_SYMBOL(oplus_kevent_fb);
 
 #define CAUSENAME_SIZE 128
 
@@ -188,6 +183,7 @@ int oplus_kevent_fb_str(fb_tag tag_id, const char *event_id, unsigned char *str)
 	pr_err("%s, payload= %s, ret=%d\n", __func__, payload, ret);
 	return oplus_kevent_fb(tag_id, event_id, payload);
 }
+EXPORT_SYMBOL(oplus_kevent_fb_str);
 
 /*thread to deal with the buffer list*/
 static int fb_flush_thread(void *arg)

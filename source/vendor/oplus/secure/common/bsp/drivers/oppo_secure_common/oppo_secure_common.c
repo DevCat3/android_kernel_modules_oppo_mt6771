@@ -18,7 +18,7 @@
 || CONFIG_OPPO_BSP_SECCOM_PLATFORM == 7250 || CONFIG_OPPO_BSP_SECCOM_PLATFORM == 8250 || CONFIG_OPPO_BSP_SECCOM_PLATFORM == 7125
 #include <linux/soc/qcom/smem.h>
 #else
-#include <soc/qcom/smem.h>
+#include <linux/uaccess.h>
 #endif
 
 #include <linux/slab.h>
